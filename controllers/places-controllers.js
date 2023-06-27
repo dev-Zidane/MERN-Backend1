@@ -52,3 +52,29 @@ exports.createPlace = (req, res) => {
 
 	res.status(201).json({ place: createdPlace });
 };
+
+exports.updatePlace = (req, res) => {
+	const createdPlace = ({ title, description } = req.body);
+	const placeId = req.params.pid;
+
+	const updatedPlace = { ...DUMMY_PLACES.find((p) => p.id === placeId) };
+	const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
+	updatedPlace.title = title;
+	updatedPlace.description = description;
+
+	DUMMY_PLACES[placeIndex] = updatedPlace;
+
+	res.status(200).json({ place: updatedPlace });
+};
+
+exports.deletePlace = (req, res) => {
+	const createdPlace = ({ title, description, coordinates, address, creator } =
+		req.body);
+	const placeId = req.params.pid;
+
+	const deletedPlace = { ...DUMMY_PLACES.find((p) => p.id === placeId) };
+
+	DUMMY_PLACES.pop(createdPlace);
+
+	res.status(200).send({ message: 'Place deleted' });
+};
