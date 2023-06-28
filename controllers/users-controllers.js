@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const HttpError = require('../models/http-error');
+const { validationResult } = require('express-validator');
 
 const DUMMY_USERS = [
 	{
@@ -7,8 +8,8 @@ const DUMMY_USERS = [
 		name: 'Zidane',
 		email: 'zidane@gmail.com',
 		password: 'test',
-		image:
-			'https://media.licdn.com/dms/image/D4E03AQGQEnrHaoM6vA/profile-displayphoto-shrink_200_200/0/1687123112514?e=1692835200&v=beta&t=VzoQ4nGUnHK7Qz9gdhmwPbBUDUwtawpr_Q6cdBSqVEs',
+		// image:
+		// 	'https://media.licdn.com/dms/image/D4E03AQGQEnrHaoM6vA/profile-displayphoto-shrink_200_200/0/1687123112514?e=1692835200&v=beta&t=VzoQ4nGUnHK7Qz9gdhmwPbBUDUwtawpr_Q6cdBSqVEs',
 	},
 ];
 
@@ -17,6 +18,11 @@ exports.getUsers = (req, res, next) => {
 };
 
 exports.createUser = (req, res) => {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		console.log(errors);
+		throw new HttpError('Invalid inputs, please check your input', 422);
+	}
 	const { name, email, password } = req.body;
 	const hasUser = DUMMY_USERS.find((u) => u.email === email);
 	if (hasUser) {
@@ -27,7 +33,7 @@ exports.createUser = (req, res) => {
 		name,
 		email,
 		password,
-		image,
+		// image,
 	};
 	DUMMY_USERS.push(createdUser);
 
@@ -35,6 +41,11 @@ exports.createUser = (req, res) => {
 };
 
 exports.loginUser = (req, res) => {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		console.log(errors);
+		throw new HttpError('Invalid inputs, please check your input', 422);
+	}
 	const { email, password } = req.body;
 
 	const users = DUMMY_USERS.find((user) => user.email === email);
