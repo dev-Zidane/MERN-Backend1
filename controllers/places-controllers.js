@@ -1,5 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
-const DUMMY_PLACES = [
+const HttpError = require('../models/http-error');
+
+let DUMMY_PLACES = [
 	{
 		id: 'p1',
 		title: 'Empire State Building',
@@ -20,22 +22,22 @@ exports.getPlacebyId = (req, res) => {
 	});
 
 	if (!place) {
-		throw new HttpError('Could not find place for provided id', 404);
+		throw new HttpError('Could not find places for provided id', 404);
 	}
 
 	res.json({ place });
 };
 
-exports.getPlaceByUserId = (req, res) => {
+exports.getPlacesByUserId = (req, res) => {
 	const userId = req.params.uid;
-	const place = DUMMY_PLACES.find((p) => {
+	const places = DUMMY_PLACES.filter((p) => {
 		return p.creator === userId;
 	});
-	if (!place) {
-		return next(new HttpError('Could not find place for provided id', 404));
+	if (!places || places.length === 0) {
+		return next(new HttpError('Could not find places for provided id', 404));
 	}
 
-	res.json({ place });
+	res.json({ places });
 };
 
 exports.createPlace = (req, res) => {
@@ -50,7 +52,7 @@ exports.createPlace = (req, res) => {
 	};
 	DUMMY_PLACES.push(createdPlace);
 
-	res.status(201).json({ place: createdPlace });
+	res.status(201).json({ places: createdPlace });
 };
 
 exports.updatePlace = (req, res) => {
@@ -68,13 +70,8 @@ exports.updatePlace = (req, res) => {
 };
 
 exports.deletePlace = (req, res) => {
-	const createdPlace = ({ title, description, coordinates, address, creator } =
-		req.body);
 	const placeId = req.params.pid;
-
-	const deletedPlace = { ...DUMMY_PLACES.find((p) => p.id === placeId) };
-
-	DUMMY_PLACES.pop(createdPlace);
+	DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.id !== placeId);
 
 	res.status(200).send({ message: 'Place deleted' });
 };
