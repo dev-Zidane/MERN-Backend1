@@ -12,17 +12,13 @@ router.get('/users/:uid', placesControllers.getPlacesByUserId);
 
 router.post(
 	'/',
-	[
-		check('title').not().isEmpty(),
-		check('description').isLength({ min: 5 }),
-		check('address').not().notEmpty(),
-	],
+	[check('title').not().isEmpty(), check('address').not().notEmpty()],
 	placesControllers.createPlace
 );
 
 router.patch(
 	'/:pid',
-	[check('title').not().isEmpty(), check('decription').not().isEmpty()],
+	[check('title').not().isEmpty(), check('description').not().notEmpty()],
 	placesControllers.updatePlace
 );
 
