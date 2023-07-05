@@ -99,7 +99,7 @@ exports.updatePlace = async (req, res, next) => {
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
 		console.log(errors);
-		throw new HttpError('Invalid inputs, please check your input', 422);
+		return next(new HttpError('Invalid inputs, please check your input', 422));
 	}
 	const { title, description } = req.body;
 	const placeId = req.params.pid;
@@ -128,13 +128,20 @@ exports.updatePlace = async (req, res, next) => {
 
 	res.status(200).json({ place: place.toObject({ getters: true }) });
 };
-
-exports.deletePlace = (req, res) => {
+exports.deletePlace = async (req, res, next) => {
 	const placeId = req.params.pid;
-	if (DUMMY_PLACES.find((p) => p.id === placeId)) {
-		throw new HttpError('Could not find a place for that id');
+	let place;
+	try {
+		place = await Place.findByIdAndDelete(placeId);
+	} catch (err) {
+		const error = new HttpError('Could not delete place for provided id', 500);
+		return next(error);
 	}
-	DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.id !== placeId);
+
+	if (!place) {
+		const error = new HttpError('No place found with that id', 404);
+		return next(error);
+	}
 
 	res.status(200).send({ message: 'Place deleted' });
 };

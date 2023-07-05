@@ -15,7 +15,7 @@ router.post(
 		check('password').isLength({ min: 5 }),
 		// check('image').isURL(),
 	],
-	usersController.createUser
+	usersController.signup
 );
 
 router.post('/login', [], usersController.loginUser);
