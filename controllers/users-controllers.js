@@ -34,7 +34,7 @@ exports.signup = async (req, res, next) => {
 		console.log(errors);
 		return next(new HttpError('Invalid inputs, please check your input', 422));
 	}
-	const { name, email, password, places } = req.body;
+	const { name, email, password } = req.body;
 
 	let existingUser;
 	try {
@@ -61,7 +61,7 @@ exports.signup = async (req, res, next) => {
 		image:
 			'https://media.licdn.com/dms/image/D4E03AQGQEnrHaoM6vA/profile-displayphoto-shrink_800_800/0/1687123112514?e=1694044800&v=beta&t=l7wts58FrW-7efUZm6iTXKC5IIkmk3JuYr5VTKQO5xU',
 		password,
-		places,
+		places: [],
 	});
 
 	try {
