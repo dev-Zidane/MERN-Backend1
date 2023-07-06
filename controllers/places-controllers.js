@@ -3,6 +3,8 @@ const HttpError = require('../models/http-error');
 const { validationResult } = require('express-validator');
 const Place = require('../models/place');
 const getCoordsForAddress = require('../util/location');
+const User = require('../models/user');
+const mongoose = require('mongoose');
 
 let DUMMY_PLACES = [
 	{
@@ -86,13 +88,35 @@ exports.createPlace = async (req, res, next) => {
 			'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/NYC_Empire_State_Building.jpg/640px-NYC_Empire_State_Building.jpg',
 		creator,
 	});
+
+	let user;
+
 	try {
-		await createdPlace.save();
+		user = await User.findById(creator);
+	} catch (err) {
+		const error = new HttpError('Could not create place', 500);
+		return next(error);
+	}
+
+	if (!user) {
+		const error = new HttpError('Could not find user for provided id', 404);
+		return next(error);
+	}
+
+	console.log(user);
+
+	try {
+		const sess = await mongoose.startSession();
+		sess.startTransaction();
+		await createdPlace.save({ session: sess });
+		user.places.push(createdPlace);
+		await user.save({ session: sess });
+		await sess.commitTransaction();
 	} catch (err) {
 		const error = new HttpError('Error creating place', 500);
 		return next(error);
 	}
-	res.status(201).json({ places: createdPlace });
+	res.status(201).json({ place: createdPlace });
 };
 
 exports.updatePlace = async (req, res, next) => {
