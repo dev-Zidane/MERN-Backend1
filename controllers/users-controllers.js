@@ -64,18 +64,19 @@ exports.signup = async (req, res, next) => {
 	res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
-exports.loginUser = (req, res) => {
-	const errors = validationResult(req);
-	if (!errors.isEmpty()) {
-		console.log(errors);
-		throw new HttpError('Invalid inputs, please check your input', 422);
-	}
+exports.loginUser = async (req, res, next) => {
 	const { email, password } = req.body;
+	let existingUser;
+	try {
+		existingUser = await User.findOne({ email: email });
+	} catch (err) {
+		const error = new HttpError('Something went wrong, could not login', 500);
+		return next(error);
+	}
 
-	const users = DUMMY_USERS.find((user) => user.email === email);
-
-	if (!users || users.password !== password) {
-		throw new HttpError('Could not find user for provided id', 404);
+	if (!existingUser || existingUser.password !== password) {
+		const error = new HttpError('Invalid credentials, could not login', 401);
+		return next(error);
 	}
 
 	res.status(200).send({ message: 'User logged in' });
