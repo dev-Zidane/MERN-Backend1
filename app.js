@@ -33,5 +33,5 @@ mongoose
 		app.listen(5000);
 	})
 	.catch((error) => {
-		console.log(err);
+		console.log(error);
 	});

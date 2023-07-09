@@ -6,20 +6,6 @@ const getCoordsForAddress = require('../util/location');
 const User = require('../models/user');
 const mongoose = require('mongoose');
 
-let DUMMY_PLACES = [
-	{
-		id: 'p1',
-		title: 'Empire State Building',
-		description: 'One of the most famous sky scrapers in the world',
-		location: {
-			lat: 40.7484474,
-			lng: -73.9871516,
-		},
-		address: '20 W 34th St, New York, NY 10001',
-		creator: 'u1',
-	},
-];
-
 exports.getPlacebyId = async (req, res, next) => {
 	const placeId = req.params.pid;
 
@@ -156,7 +142,7 @@ exports.deletePlace = async (req, res, next) => {
 	const placeId = req.params.pid;
 	let place;
 	try {
-		place = await Place.findByIdAndDelete(placeId);
+		place = await Place.findByIdAndDelete(placeId).populate('creator');
 	} catch (err) {
 		const error = new HttpError('Could not delete place for provided id', 500);
 		return next(error);
@@ -167,5 +153,20 @@ exports.deletePlace = async (req, res, next) => {
 		return next(error);
 	}
 
-	res.status(200).send({ message: 'Place deleted' });
+	try {
+		const sess = await mongoose.startSession();
+		sess.startTransaction();
+		await place.remove({ session: sess });
+		place.creator.places.pull(place);
+		await place.creator.save({ session: sess });
+		await sess.commitTransaction();
+	} catch (err) {
+		const error = new HttpError(
+			'Something went wrong, could not delete place.',
+			500
+		);
+		return next(error);
+	}
+
+	res.status(200).json({ message: 'Place deleted' });
 };

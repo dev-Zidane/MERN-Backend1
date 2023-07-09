@@ -1,18 +1,6 @@
-const { v4: uuidv4 } = require('uuid');
 const HttpError = require('../models/http-error');
 const { validationResult } = require('express-validator');
 const User = require('../models/user');
-
-const DUMMY_USERS = [
-	{
-		id: 'u1',
-		name: 'Zidane',
-		email: 'zidane@gmail.com',
-		password: 'test',
-		// image:
-		// 	'https://media.licdn.com/dms/image/D4E03AQGQEnrHaoM6vA/profile-displayphoto-shrink_200_200/0/1687123112514?e=1692835200&v=beta&t=VzoQ4nGUnHK7Qz9gdhmwPbBUDUwtawpr_Q6cdBSqVEs',
-	},
-];
 
 exports.getUsers = async (req, res, next) => {
 	let users;
